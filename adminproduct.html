@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Products – Nurfia</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+  <!-- Gate: shown only if user is not admin -->
+  <div class="admin-gate" id="adminGate" style="display:none;">
+    <div class="admin-gate-box">
+      <i class="fa-solid fa-lock"></i>
+      <h2>Admin Access Only</h2>
+      <p>You don't have permission to view this page.</p>
+      <a href="index.html" class="admin-gate-btn">Back to Home</a>
+    </div>
+  </div>
+
+  <div class="admin-layout" id="adminLayout" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <a href="index.html" class="admin-logo">NURFIA</a>
+      <p class="admin-sidebar-label">Admin Panel</p>
+      
+      <nav class="admin-nav">
+  <a href="admindashboard.html" class="admin-nav-item">
+    <i class="fa-solid fa-gauge"></i> Dashboard
+  </a>
+  <a href="adminproduct.html" class="admin-nav-item active">
+    <i class="fa-solid fa-shirt"></i> Products
+  </a>
+  <a href="adminorders.html" class="admin-nav-item">
+    <i class="fa-solid fa-box"></i> Orders
+  </a>
+  <a href="adminusers.html" class="admin-nav-item">
+    <i class="fa-solid fa-users"></i> Users
+  </a>
+</nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="admin-main">
+      <div class="admin-topbar">
+        <div>
+          <h1 class="admin-page-title">Products</h1>
+          <p class="admin-page-sub" id="productCountLabel">Loading products…</p>
+        </div>
+        <button class="admin-primary-btn" id="addProductBtn">
+          <i class="fa-solid fa-plus"></i> Add Product
+        </button>
+      </div>
+
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminProductsBody">
+            <tr><td colspan="6" class="admin-table-loading">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Product Modal -->
+  <div class="admin-modal-overlay" id="productModalOverlay"></div>
+  <div class="admin-modal" id="productModal">
+    <button class="admin-modal-close" id="productModalClose"><i class="fa-solid fa-xmark"></i></button>
+    <h2 class="admin-modal-title" id="productModalTitle">Add Product</h2>
+
+    <div class="admin-modal-body">
+      <div class="admin-form-grid">
+        <div class="admin-field">
+          <label>Product Name *</label>
+          <input type="text" id="pf-name" />
+        </div>
+        <div class="admin-field">
+          <label>Category *</label>
+          <input type="text" id="pf-category" placeholder="e.g. Women" />
+        </div>
+        <div class="admin-field">
+          <label>Sub Category</label>
+          <input type="text" id="pf-subCategory" placeholder="e.g. Dresses" />
+        </div>
+        <div class="admin-field">
+          <label>Price *</label>
+          <input type="number" id="pf-price" step="0.01" />
+        </div>
+        <div class="admin-field">
+          <label>Sale Price</label>
+          <input type="number" id="pf-salePrice" step="0.01" />
+        </div>
+        <div class="admin-field">
+          <label>Discount (%)</label>
+          <input type="number" id="pf-discount" />
+        </div>
+        <div class="admin-field">
+          <label>Stock</label>
+          <input type="number" id="pf-stock" />
+        </div>
+        <div class="admin-field">
+          <label>Availability</label>
+          <select id="pf-availability">
+            <option value="true">In Stock</option>
+            <option value="false">Out of Stock</option>
+          </select>
+        </div>
+        <div class="admin-field">
+          <label>Main Image URL</label>
+          <input type="text" id="pf-image" placeholder="/images/product.jpg" />
+        </div>
+        <div class="admin-field admin-field-full">
+          <label>Extra Image URLs (comma separated)</label>
+          <input type="text" id="pf-images" placeholder="/images/a.jpg, /images/b.jpg" />
+        </div>
+        <div class="admin-field">
+          <label>Colors (comma separated)</label>
+          <input type="text" id="pf-colors" placeholder="Black, White, Beige" />
+        </div>
+        <div class="admin-field">
+          <label>Sizes (comma separated)</label>
+          <input type="text" id="pf-sizes" placeholder="S, M, L, XL" />
+        </div>
+        <div class="admin-field admin-field-full">
+          <label>Tags (comma separated)</label>
+          <input type="text" id="pf-tags" placeholder="summer, linen, casual" />
+        </div>
+        <div class="admin-field admin-field-full">
+          <label>Description</label>
+          <textarea id="pf-description" rows="4"></textarea>
+        </div>
+      </div>
+      <p class="admin-form-error" id="productFormError"></p>
+    </div>
+
+    <div class="admin-modal-footer">
+      <button class="admin-secondary-btn" id="productModalCancel">Cancel</button>
+      <button class="admin-primary-btn" id="productModalSave">Save Product</button>
+    </div>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div class="admin-modal-overlay" id="deleteModalOverlay"></div>
+  <div class="admin-confirm-modal" id="deleteModal">
+    <i class="fa-solid fa-triangle-exclamation admin-confirm-icon"></i>
+    <h3>Delete this product?</h3>
+    <p>This action can't be undone.</p>
+    <div class="admin-confirm-actions">
+      <button class="admin-secondary-btn" id="deleteModalCancel">Cancel</button>
+      <button class="admin-danger-btn" id="deleteModalConfirm">Delete</button>
+    </div>
+  </div>
+
+  <script type="module" src="adminproduct.js"></script>
+</body>
+</html>

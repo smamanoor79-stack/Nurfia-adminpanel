@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Users – Nurfia</title>
+  <link rel="stylesheet" href="admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+    }
+    .page-header h2 { font-size: 28px; font-weight: 300; letter-spacing: .5px; color:#1a1a1a; }
+    .page-header p  { font-size: 13px; color: #888; margin-top: 4px; }
+
+    .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 6px 16px; border-radius: 20px;
+      border: 1px solid #ddd; background: #fff;
+      font-size: 12px; cursor: pointer; color: #555;
+      transition: all .15s; white-space: nowrap;
+    }
+    .filter-btn.active, .filter-btn:hover { background: #1c1c1e; color: #fff; border-color: #1c1c1e; }
+    .search-box {
+      margin-left: auto; padding: 6px 14px;
+      border: 1px solid #ddd; border-radius: 20px;
+      font-size: 12px; background: #fff; color: #333;
+      outline: none; width: 220px; min-width: 0;
+    }
+    .search-box:focus { border-color: #aaa; }
+
+    .table-wrap {
+      background: #fff; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e8e8e8;
+      -webkit-overflow-scrolling: touch;
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 560px; }
+    thead tr { border-bottom: 1px solid #eee; }
+    thead th {
+      padding: 13px 16px; text-align: left;
+      font-size: 11px; font-weight: 600; color: #999;
+      letter-spacing: .8px; text-transform: uppercase; white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid #f2f2f2; transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafafa; }
+    tbody td { padding: 14px 16px; font-size: 13px; color: #333; vertical-align: middle; }
+
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #1c1c1e; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; flex-shrink: 0;
+    }
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .user-name  { font-weight: 500; }
+    .user-email { font-size: 11px; color: #999; margin-top: 2px; }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-admin { background: #d1fae5; color: #065f46; }
+    .badge-user  { background: #f3f4f6; color: #6b7280; }
+
+    .toggle-wrap { display: flex; align-items: center; gap: 8px; }
+    .toggle { position: relative; width: 36px; height: 20px; cursor: pointer; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: #ddd; border-radius: 20px;
+      transition: background .2s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #fff; top: 3px; left: 3px;
+      transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle input:checked + .toggle-slider { background: #1c1c1e; }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+    .action-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 5px; border-radius: 4px; color: #888;
+      transition: background .15s, color .15s;
+    }
+    .action-btn:hover { background: #fee2e2; color: #dc2626; }
+    .action-btn svg { width: 15px; height: 15px; display: block; }
+
+    .loading, .empty-state { text-align: center; padding: 60px 20px; color: #888; font-size: 14px; }
+    .spinner {
+      width: 32px; height: 32px; margin: 0 auto 14px;
+      border: 3px solid #eee; border-top-color: #555;
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 300;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 10px;
+      width: 100%; max-width: 400px;
+      padding: 28px 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+    .modal p  { font-size: 13px; color: #666; line-height: 1.6; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 22px; justify-content: flex-end; }
+    .btn-cancel {
+      padding: 9px 20px; border: 1px solid #ddd; background: #fff;
+      border-radius: 6px; font-size: 13px; cursor: pointer; color: #555;
+    }
+    .btn-cancel:hover { background: #f5f5f5; }
+    .btn-confirm-delete {
+      padding: 9px 20px; background: #dc2626; color: #fff;
+      border: none; border-radius: 6px; font-size: 13px; cursor: pointer;
+    }
+    .btn-confirm-delete:hover { background: #b91c1c; }
+
+    .toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: #1c1c1e; color: #fff;
+      padding: 12px 20px; border-radius: 8px;
+      font-size: 13px; opacity: 0; transform: translateY(10px);
+      transition: all .25s; pointer-events: none; z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 767px) {
+      .page-header h2 { font-size: 22px; }
+      .search-box { width: 100%; margin-left: 0; order: 5; }
+      .user-email { display: none; }
+      .toast { left: 16px; right: 16px; bottom: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body class="admin-body">
+
+  <!-- ✅ Gate: Admin nahi hai to yeh dikhe ga -->
+  <div class="admin-gate" id="adminGate" style="display:none;">
+    <div class="admin-gate-box">
+      <i class="fa-solid fa-lock"></i>
+      <h2>Admin Access Only</h2>
+      <p>You don't have permission to view this page.</p>
+      <a href="index.html" class="admin-gate-btn">Back to Home</a>
+    </div>
+  </div>
+
+  <!-- ✅ Layout: Sirf admin ko dikhe ga -->
+  <div class="admin-layout" id="adminLayout" style="display:none;">
+
+    <aside class="admin-sidebar">
+      <a href="index.html" class="admin-logo">NURFIA</a>
+      <p class="admin-sidebar-label">Admin Panel</p>
+
+      <nav class="admin-nav">
+        <a href="admindashboard.html" class="admin-nav-item">
+          <i class="fa-solid fa-gauge"></i> Dashboard
+        </a>
+        <a href="adminproduct.html" class="admin-nav-item">
+          <i class="fa-solid fa-shirt"></i> Products
+        </a>
+        <a href="adminorders.html" class="admin-nav-item">
+          <i class="fa-solid fa-box"></i> Orders
+        </a>
+        <a href="adminusers.html" class="admin-nav-item active">
+          <i class="fa-solid fa-users"></i> Users
+        </a>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <a href="index.html" class="admin-back-link"><i class="fa-solid fa-arrow-left"></i> Back to Site</a>
+        <button class="admin-logout-btn" id="adminLogoutBtn">Log Out</button>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <div class="page-header">
+        <div>
+          <h2>Users</h2>
+          <p id="userCount">Loading…</p>
+        </div>
+      </div>
+
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all"   onclick="applyFilter(this)">All</button>
+        <button class="filter-btn" data-filter="admin"        onclick="applyFilter(this)">Admins</button>
+        <button class="filter-btn" data-filter="user"         onclick="applyFilter(this)">Customers</button>
+        <input class="search-box" id="searchInput" type="text"
+               placeholder="Search by name or email…" oninput="renderTable()" />
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>User</th><th>Joined</th><th>Role</th><th>Admin Access</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr><td colspan="5"><div class="loading"><div class="spinner"></div>Fetching users…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal">
+      <h3>Delete User?</h3>
+      <p id="modalMsg">Are you sure you want to delete this user? This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModalDirect()">Cancel</button>
+        <button class="btn-confirm-delete" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const API_BASE = 'http://localhost:5000/api';
+
+  let allUsers = [];
+  let currentFilter = 'all';
+  let deleteTargetId = null;
+
+  // ✅ Fixed: nurfia_token use ho raha hai (api.js ke saath match)
+  const getToken = () => localStorage.getItem('nurfia_token');
+  const authHeaders = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` });
+
+  // ✅ Gate Check
+  const nurfia_user = localStorage.getItem('nurfia_user');
+  const currentUser = nurfia_user ? JSON.parse(nurfia_user) : null;
+  const token = getToken();
+
+  if (!token || !currentUser || !currentUser.isAdmin) {
+    document.getElementById('adminGate').style.display = 'flex';
+    document.getElementById('adminLayout').style.display = 'none';
+  } else {
+    document.getElementById('adminGate').style.display = 'none';
+    document.getElementById('adminLayout').style.display = 'flex';
+    loadUsers(); // ✅ Sirf admin ke liye load hoga
+  }
+
+  document.getElementById('adminLogoutBtn').addEventListener('click', handleLogout);
+
+  async function loadUsers() {
+    try {
+      const res = await fetch(`${API_BASE}/users/admin/all`, { headers: authHeaders() });
+      if (!res.ok) throw new Error(await res.text());
+      allUsers = await res.json();
+      document.getElementById('userCount').textContent = `${allUsers.length} users total`;
+      renderTable();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('usersTableBody').innerHTML =
+        `<tr><td colspan="5"><div class="empty-state">⚠️ Could not load users. Check your API and token.</div></td></tr>`;
+      document.getElementById('userCount').textContent = '—';
+    }
+  }
+
+  function applyFilter(btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderTable();
+  }
+
+  function getInitials(name) {
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  function renderTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allUsers.filter(u => {
+      const matchFilter =
+        currentFilter === 'all' ||
+        (currentFilter === 'admin' && u.isAdmin) ||
+        (currentFilter === 'user' && !u.isAdmin);
+      const matchSearch =
+        u.name.toLowerCase().includes(search) ||
+        u.email.toLowerCase().includes(search);
+      return matchFilter && matchSearch;
+    });
+
+    const tbody = document.getElementById('usersTableBody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">No users found.</div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(u => {
+      const joined = new Date(u.createdAt).toLocaleDateString('en-PK', { day:'2-digit', month:'short', year:'numeric' });
+      const roleBadge = u.isAdmin
+        ? `<span class="badge badge-admin">Admin</span>`
+        : `<span class="badge badge-user">Customer</span>`;
+      const deleteDisabled = u.isAdmin ? 'style="opacity:.3;pointer-events:none"' : '';
+
+      return `
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">${getInitials(u.name)}</div>
+              <div>
+                <div class="user-name">${u.name}</div>
+                <div class="user-email">${u.email}</div>
+              </div>
+            </div>
+          </td>
+          <td>${joined}</td>
+          <td>${roleBadge}</td>
+          <td>
+            <div class="toggle-wrap">
+              <label class="toggle">
+                <input type="checkbox" ${u.isAdmin ? 'checked' : ''}
+                  onchange="toggleAdmin('${u._id}', this.checked)" />
+                <span class="toggle-slider"></span>
+              </label>
+              <span style="font-size:12px;color:#888">${u.isAdmin ? 'Admin' : 'User'}</span>
+            </div>
+          </td>
+          <td>
+            <button class="action-btn" title="Delete user"
+              onclick="openDeleteModal('${u._id}', '${u.name.replace(/'/g,"\\'")}')" ${deleteDisabled}>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  async function toggleAdmin(userId, isAdmin) {
+    try {
+      const res = await fetch(`${API_BASE}/users/admin/${userId}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ isAdmin })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const updated = await res.json();
+      const idx = allUsers.findIndex(u => u._id === userId);
+      if (idx !== -1) allUsers[idx].isAdmin = updated.isAdmin;
+      renderTable();
+      showToast(`${updated.name} is now ${updated.isAdmin ? 'an Admin' : 'a Customer'}`);
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to update role');
+      renderTable();
+    }
+  }
+
+  function openDeleteModal(userId, userName) {
+    deleteTargetId = userId;
+    document.getElementById('modalMsg').textContent =
+      `Are you sure you want to delete "${userName}"? This action cannot be undone.`;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+  }
+  function closeModalDirect() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    deleteTargetId = null;
+  }
+
+  async function confirmDelete() {
+    if (!deleteTargetId) return;
+    try {
+      const res = await fetch(`${API_BASE}/users/admin/${deleteTargetId}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      if (!res.ok) throw new Error(await res.text());
+      allUsers = allUsers.filter(u => u._id !== deleteTargetId);
+      document.getElementById('userCount').textContent = `${allUsers.length} users total`;
+      renderTable();
+      closeModalDirect();
+      showToast('User deleted successfully');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to delete user');
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('nurfia_token');
+    localStorage.removeItem('nurfia_user');
+    window.location.href = 'index.html';
+  }
+</script>
+</body>
+</html>
