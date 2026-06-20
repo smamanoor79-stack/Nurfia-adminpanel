@@ -8,6 +8,7 @@ import {
   deleteProduct,
   adminGetAllOrders,
   adminGetAllUsers,
+  uploadImage,
 } from './api.js';
 
 const gate = document.getElementById('adminGate');
@@ -124,6 +125,8 @@ function openAddModal() {
   fields.forEach(f => { if (getField(f)) getField(f).value = ''; });
   getField('availability').value = 'true';
   productFormError.textContent = '';
+  const status = document.getElementById('uploadStatus');
+  if (status) status.textContent = '';
   openProductModal();
 }
 
@@ -133,6 +136,8 @@ function openEditModal(id) {
   editingId = id;
   productModalTitle.textContent = 'Edit Product';
   productFormError.textContent = '';
+  const status = document.getElementById('uploadStatus');
+  if (status) status.textContent = '';
 
   getField('name').value = p.name || '';
   getField('category').value = p.category || '';
@@ -217,6 +222,21 @@ document.getElementById('productModalSave')?.addEventListener('click', async () 
   }
 });
 
+// ===== IMAGE UPLOAD (Cloudinary) =====
+document.getElementById('pf-imageFile')?.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('uploadStatus');
+  status.textContent = 'Uploading…';
+  try {
+    const url = await uploadImage(file);
+    getField('image').value = url;
+    status.textContent = 'Uploaded ✓';
+  } catch (err) {
+    status.textContent = 'Upload failed';
+  }
+});
+
 // ===== DELETE MODAL =====
 const deleteModal = document.getElementById('deleteModal');
 const deleteModalOverlay = document.getElementById('deleteModalOverlay');
@@ -253,9 +273,7 @@ document.getElementById('deleteModalConfirm')?.addEventListener('click', async (
   }
 });
 
-/* =========================================================
-   DASHBOARD PAGE (index.html)
-========================================================= */
+// Dasboard Page
 
 function initDashboardGreeting() {
   const hr = new Date().getHours();

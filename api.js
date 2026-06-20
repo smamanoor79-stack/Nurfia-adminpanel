@@ -1,5 +1,5 @@
 // api.js
-export const BASE_URL = 'https://nurfiabackend-p15steus.b4a.run';
+export const BASE_URL = 'https://nurfiabackend-t5gdfm2v.b4a.run/';
 
 // Token helpers
 export function getToken() {
@@ -153,11 +153,28 @@ export async function updateProduct(id, productData) {
 export async function deleteProduct(id) {
   return await apiFetch(`/api/products/${id}`, { method: 'DELETE' });
 }
-// Admin APIs — api.js mein add karo
+// Admin APIs — 
 export async function adminGetAllOrders() {
   return await apiFetch('/api/orders/admin/all');
 }
 
 export async function adminGetAllUsers() {
   return await apiFetch('/api/users/admin/all');
+}
+
+export async function uploadImage(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const res = await fetch(`${BASE_URL}/api/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) throw new Error('Image upload failed');
+  const data = await res.json();
+  return data.url;
 }
