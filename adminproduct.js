@@ -13,7 +13,7 @@ import {
 const gate = document.getElementById('adminGate');
 const layout = document.getElementById('adminLayout');
 
-// Page detection — same file works on adminproduct.html AND admindashboard.html
+// Page detection — same file works on adminproduct.html AND index.html
 const isProductsPage = !!document.getElementById('adminProductsBody');
 const isDashboardPage = !!document.getElementById('statRevenue');
 
@@ -254,7 +254,7 @@ document.getElementById('deleteModalConfirm')?.addEventListener('click', async (
 });
 
 /* =========================================================
-   DASHBOARD PAGE (admindashboard.html)
+   DASHBOARD PAGE (index.html)
 ========================================================= */
 
 function initDashboardGreeting() {
