@@ -1,5 +1,5 @@
 // api.js
-export const BASE_URL = 'http://localhost:5000';
+export const BASE_URL = 'https://nurfiabackend-nqewxdjc.b4a.run/';
 
 // Token helpers
 export function getToken() {
