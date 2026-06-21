@@ -1,6 +1,6 @@
 const isProd = window.location.hostname !== 'localhost';
 export const BASE_URL = isProd
-  ? 'https://YOUR-RENDER-URL.onrender.com'  // Render deploy hone ke baad yahan actual URL dalna
+  ? 'https://nurfia-backend.bonto.run'  
   : 'http://localhost:5000';
 
 export function getImageUrl(imagePath) {
@@ -185,7 +185,7 @@ export async function uploadImage(formData) {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`
-      // Content-Type mat dalna — browser khud set karta hai
+      
     },
     body: formData
   });
