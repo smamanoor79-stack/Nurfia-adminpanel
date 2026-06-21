@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin – Orders – Nurfia</title>
+  <title>Admin – Messages – Nurfia</title>
   <link rel="stylesheet" href="admin.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link
@@ -126,6 +126,11 @@
       background: #fafafa;
     }
 
+    tbody tr.unread {
+      background: #fafaff;
+      font-weight: 600;
+    }
+
     tbody td {
       padding: 14px 16px;
       font-size: 13px;
@@ -133,7 +138,7 @@
       vertical-align: middle;
     }
 
-    .order-id {
+    .msg-id {
       font-family: monospace;
       color: #555;
       font-size: 12px;
@@ -150,6 +155,13 @@
       margin-top: 2px;
     }
 
+    .subject-cell {
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .badge {
       display: inline-block;
       padding: 3px 10px;
@@ -159,24 +171,14 @@
       white-space: nowrap;
     }
 
-    .badge-pending {
+    .badge-unread {
       background: #fff3cd;
       color: #856404;
     }
 
-    .badge-paid {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .badge-delivered {
+    .badge-read {
       background: #dbeafe;
       color: #1e40af;
-    }
-
-    .badge-processing {
-      background: #ede9fe;
-      color: #5b21b6;
     }
 
     .action-btn {
@@ -192,6 +194,11 @@
     .action-btn:hover {
       background: #f0f0f0;
       color: #333;
+    }
+
+    .action-btn.delete-btn:hover {
+      background: #fde2e2;
+      color: #c0392b;
     }
 
     .action-btn svg {
@@ -290,60 +297,16 @@
       margin-top: 20px;
     }
 
-    .order-item-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid #f2f2f2;
-    }
-
-    .order-item-row:last-child {
-      border-bottom: none;
-    }
-
-    .order-item-img {
-      width: 44px;
-      height: 52px;
-      object-fit: cover;
-      border-radius: 4px;
-      background: #eee;
-      flex-shrink: 0;
-    }
-
-    .order-item-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .order-item-info strong {
+    .message-body {
       font-size: 13px;
-      display: block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .order-item-info span {
-      font-size: 11px;
-      color: #888;
-    }
-
-    .order-item-price {
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .status-select {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 13px;
-      margin-top: 4px;
-      background: #fff;
       color: #333;
+      line-height: 1.7;
+      background: #fafafa;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      padding: 14px 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .btn-update {
@@ -361,6 +324,23 @@
 
     .btn-update:hover {
       background: #2e2e32;
+    }
+
+    .btn-secondary {
+      margin-top: 10px;
+      width: 100%;
+      padding: 11px;
+      background: #fff;
+      color: #c0392b;
+      border: 1px solid #f0d0d0;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .btn-secondary:hover {
+      background: #fde2e2;
     }
 
     .loading,
@@ -496,13 +476,13 @@
         <a href="adminproduct.html" class="admin-nav-item">
           <i class="fa-solid fa-shirt"></i> Products
         </a>
-        <a href="adminorders.html" class="admin-nav-item active">
+        <a href="adminorders.html" class="admin-nav-item">
           <i class="fa-solid fa-box"></i> Orders
         </a>
         <a href="adminusers.html" class="admin-nav-item">
           <i class="fa-solid fa-users"></i> Users
         </a>
-        <a href="adminmessages.html" class="admin-nav-item">
+        <a href="adminmessages.html" class="admin-nav-item active">
           <i class="fa-solid fa-envelope"></i> Messages
         </a>
       </nav>
@@ -516,17 +496,16 @@
     <main class="admin-main">
       <div class="page-header">
         <div>
-          <h2>Orders</h2>
-          <p id="orderCount">Loading…</p>
+          <h2>Messages</h2>
+          <p id="msgCount">Loading…</p>
         </div>
       </div>
 
       <div class="filters">
         <button class="filter-btn active" data-filter="all" onclick="applyFilter(this)">All</button>
-        <button class="filter-btn" data-filter="pending" onclick="applyFilter(this)">Pending</button>
-        <button class="filter-btn" data-filter="paid" onclick="applyFilter(this)">Paid</button>
-        <button class="filter-btn" data-filter="delivered" onclick="applyFilter(this)">Delivered</button>
-        <input class="search-box" id="searchInput" type="text" placeholder="Search by order ID or customer…"
+        <button class="filter-btn" data-filter="unread" onclick="applyFilter(this)">Unread</button>
+        <button class="filter-btn" data-filter="read" onclick="applyFilter(this)">Read</button>
+        <input class="search-box" id="searchInput" type="text" placeholder="Search by name, email or subject…"
           oninput="renderTable()" />
       </div>
 
@@ -534,21 +513,18 @@
         <table>
           <thead>
             <tr>
-              <th>Order ID</th>
-              <th>Customer</th>
               <th>Date</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Payment</th>
-              <th>Delivery</th>
+              <th>From</th>
+              <th>Subject</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="ordersTableBody">
+          <tbody id="messagesTableBody">
             <tr>
-              <td colspan="8">
+              <td colspan="5">
                 <div class="loading">
-                  <div class="spinner"></div>Fetching orders…
+                  <div class="spinner"></div>Fetching messages…
                 </div>
               </td>
             </tr>
@@ -558,55 +534,29 @@
     </main>
   </div>
 
-  <!-- Order Detail Modal -->
+  <!-- Message Detail Modal -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
     <div class="modal">
       <div class="modal-head">
         <div>
-          <h3>Order Details</h3>
-          <p id="modalOrderId" class="order-id"></p>
+          <h3>Message Details</h3>
+          <p id="modalMsgId" class="msg-id"></p>
         </div>
         <button class="modal-close" onclick="closeModalDirect()">×</button>
       </div>
 
       <div class="detail-grid">
-        <div class="detail-item"><label>Customer</label>
-          <p id="mCustomer">—</p>
-        </div>
-        <div class="detail-item"><label>Email</label>
-          <p id="mEmail">—</p>
-        </div>
-        <div class="detail-item"><label>Order Date</label>
-          <p id="mDate">—</p>
-        </div>
-        <div class="detail-item"><label>Payment Method</label>
-          <p id="mPayment">—</p>
-        </div>
-        <div class="detail-item"><label>Total Price</label>
-          <p id="mTotal">—</p>
-        </div>
-        <div class="detail-item"><label>Shipping</label>
-          <p id="mAddress">—</p>
-        </div>
+        <div class="detail-item"><label>From</label><p id="mName">—</p></div>
+        <div class="detail-item"><label>Email</label><p id="mEmail">—</p></div>
+        <div class="detail-item"><label>Date</label><p id="mDate">—</p></div>
+        <div class="detail-item"><label>Subject</label><p id="mSubject">—</p></div>
       </div>
 
-      <p class="modal-section-title">Items Ordered</p>
-      <div id="mItems"></div>
+      <p class="modal-section-title">Message</p>
+      <div class="message-body" id="mBody">—</div>
 
-      <p class="modal-section-title" style="margin-top:24px">Update Status</p>
-      <label style="font-size:12px;color:#666">Payment Status</label>
-      <select class="status-select" id="mPayStatus">
-        <option value="unpaid">Unpaid</option>
-        <option value="paid">Paid</option>
-      </select>
-
-      <label style="font-size:12px;color:#666;display:block;margin-top:12px">Delivery Status</label>
-      <select class="status-select" id="mDelStatus">
-        <option value="pending">Pending</option>
-        <option value="delivered">Delivered</option>
-      </select>
-
-      <button class="btn-update" onclick="updateOrder()">Save Changes</button>
+      <button class="btn-update" id="markReadBtn" onclick="toggleRead()">Mark as Read</button>
+      <button class="btn-secondary" onclick="deleteMessage()">Delete Message</button>
     </div>
   </div>
 
@@ -618,14 +568,9 @@
       ? 'https://nurfia-backend.bonto.run/api'
       : 'http://localhost:5000/api';
 
-    // Base URL without /api — for image paths
-    const BASE_URL = isProd
-      ? 'https://nurfia-backend.bonto.run'
-      : 'http://localhost:5000';
-
-    let allOrders = [];
+    let allMessages = [];
     let currentFilter = 'all';
-    let currentOrderId = null;
+    let currentMsgId = null;
 
     const getToken = () => localStorage.getItem('nurfia_token');
     const authHeaders = () => ({
@@ -644,30 +589,23 @@
     } else {
       document.getElementById('adminGate').style.display = 'none';
       document.getElementById('adminLayout').style.display = 'flex';
-      loadOrders();
+      loadMessages();
     }
 
     document.getElementById('adminLogoutBtn').addEventListener('click', handleLogout);
 
-    // Helper: relative image path ko full URL banao
-    function resolveImg(path) {
-      if (!path) return '';
-      if (path.startsWith('http')) return path;
-      return `${BASE_URL}${path}`;
-    }
-
-    async function loadOrders() {
+    async function loadMessages() {
       try {
-        const res = await fetch(`${API_BASE}/orders/admin/all`, { headers: authHeaders() });
+        const res = await fetch(`${API_BASE}/contact/admin/all`, { headers: authHeaders() });
         if (!res.ok) throw new Error(await res.text());
-        allOrders = await res.json();
-        document.getElementById('orderCount').textContent = `${allOrders.length} orders total`;
+        allMessages = await res.json();
+        document.getElementById('msgCount').textContent = `${allMessages.length} messages total`;
         renderTable();
       } catch (err) {
         console.error(err);
-        document.getElementById('ordersTableBody').innerHTML =
-          `<tr><td colspan="8"><div class="empty-state">⚠️ Could not load orders. Check your API and token.</div></td></tr>`;
-        document.getElementById('orderCount').textContent = '—';
+        document.getElementById('messagesTableBody').innerHTML =
+          `<tr><td colspan="5"><div class="empty-state">⚠️ Could not load messages. Check your API and token.</div></td></tr>`;
+        document.getElementById('msgCount').textContent = '—';
       }
     }
 
@@ -680,50 +618,51 @@
 
     function renderTable() {
       const search = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allOrders.filter(o => {
+      const filtered = allMessages.filter(m => {
         const matchFilter =
           currentFilter === 'all' ||
-          (currentFilter === 'paid' && o.isPaid) ||
-          (currentFilter === 'delivered' && o.isDelivered) ||
-          (currentFilter === 'pending' && !o.isPaid && !o.isDelivered);
-        const customerName = o.user?.name || '';
+          (currentFilter === 'unread' && !m.isRead) ||
+          (currentFilter === 'read' && m.isRead);
         const matchSearch =
-          o._id.toLowerCase().includes(search) ||
-          customerName.toLowerCase().includes(search);
+          (m.name || '').toLowerCase().includes(search) ||
+          (m.email || '').toLowerCase().includes(search) ||
+          (m.subject || '').toLowerCase().includes(search);
         return matchFilter && matchSearch;
       });
 
-      const tbody = document.getElementById('ordersTableBody');
+      const tbody = document.getElementById('messagesTableBody');
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No orders found.</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">No messages found.</div></td></tr>`;
         return;
       }
 
-      tbody.innerHTML = filtered.map(o => {
-        const date = new Date(o.createdAt).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' });
-        const payBadge = o.isPaid
-          ? `<span class="badge badge-paid">Paid</span>`
-          : `<span class="badge badge-pending">Unpaid</span>`;
-        const delBadge = o.isDelivered
-          ? `<span class="badge badge-delivered">Delivered</span>`
-          : `<span class="badge badge-processing">Pending</span>`;
+      // Sab se naya message pehle
+      const sorted = [...filtered].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      tbody.innerHTML = sorted.map(m => {
+        const date = new Date(m.createdAt).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' });
+        const statusBadge = m.isRead
+          ? `<span class="badge badge-read">Read</span>`
+          : `<span class="badge badge-unread">Unread</span>`;
         return `
-        <tr>
-          <td class="order-id">#${o._id.slice(-8).toUpperCase()}</td>
-          <td>
-            <div class="customer-name">${o.user?.name || 'Unknown'}</div>
-            <div class="customer-email">${o.user?.email || ''}</div>
-          </td>
+        <tr class="${m.isRead ? '' : 'unread'}">
           <td>${date}</td>
-          <td>${o.orderItems.length}</td>
-          <td><strong>$${o.totalPrice.toFixed(2)}</strong></td>
-          <td>${payBadge}</td>
-          <td>${delBadge}</td>
           <td>
-            <button class="action-btn" title="View" onclick="openModal('${o._id}')">
+            <div class="customer-name">${m.name}</div>
+            <div class="customer-email">${m.email}</div>
+          </td>
+          <td class="subject-cell">${m.subject}</td>
+          <td>${statusBadge}</td>
+          <td>
+            <button class="action-btn" title="View" onclick="openModal('${m._id}')">
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+            </button>
+            <button class="action-btn delete-btn" title="Delete" onclick="quickDelete('${m._id}')">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
               </svg>
             </button>
           </td>
@@ -731,37 +670,44 @@
       }).join('');
     }
 
-    function openModal(orderId) {
-      const o = allOrders.find(x => x._id === orderId);
-      if (!o) return;
-      currentOrderId = orderId;
+    function openModal(msgId) {
+      const m = allMessages.find(x => x._id === msgId);
+      if (!m) return;
+      currentMsgId = msgId;
 
-      document.getElementById('modalOrderId').textContent = `#${o._id.slice(-8).toUpperCase()}`;
-      document.getElementById('mCustomer').textContent = o.user?.name || 'Unknown';
-      document.getElementById('mEmail').textContent = o.user?.email || '—';
-      document.getElementById('mDate').textContent = new Date(o.createdAt).toLocaleString('en-PK');
-      document.getElementById('mPayment').textContent = o.paymentMethod;
-      document.getElementById('mTotal').textContent = `$${o.totalPrice.toFixed(2)}`;
-      document.getElementById('mAddress').textContent =
-        `${o.shippingAddress.address}, ${o.shippingAddress.city}, ${o.shippingAddress.country} ${o.shippingAddress.postalCode}`;
+      document.getElementById('modalMsgId').textContent = `#${m._id.slice(-8).toUpperCase()}`;
+      document.getElementById('mName').textContent = m.name || '—';
+      document.getElementById('mEmail').textContent = m.email || '—';
+      document.getElementById('mDate').textContent = new Date(m.createdAt).toLocaleString('en-PK');
+      document.getElementById('mSubject').textContent = m.subject || '—';
+      document.getElementById('mBody').textContent = m.message || '(No message body)';
 
-      document.getElementById('mItems').innerHTML = o.orderItems.map(item => {
-        const imgSrc = resolveImg(item.image);
-        return `
-        <div class="order-item-row">
-          <img class="order-item-img" src="${imgSrc}" alt="${item.name}"
-               onerror="this.src='https://via.placeholder.com/44x52?text=N'" />
-          <div class="order-item-info">
-            <strong>${item.name}</strong>
-            <span>Qty: ${item.quantity}</span>
-          </div>
-          <span class="order-item-price">$${(item.price * item.quantity).toFixed(2)}</span>
-        </div>`;
-      }).join('');
+      document.getElementById('markReadBtn').textContent = m.isRead ? 'Mark as Unread' : 'Mark as Read';
 
-      document.getElementById('mPayStatus').value = o.isPaid ? 'paid' : 'unpaid';
-      document.getElementById('mDelStatus').value = o.isDelivered ? 'delivered' : 'pending';
       document.getElementById('modalOverlay').classList.add('open');
+
+      // Modal khulne par automatically read mark karo (agar abhi unread hai)
+      if (!m.isRead) {
+        silentMarkRead(msgId);
+      }
+    }
+
+    async function silentMarkRead(msgId) {
+      try {
+        const res = await fetch(`${API_BASE}/contact/admin/${msgId}`, {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify({ isRead: true })
+        });
+        if (!res.ok) return;
+        const updated = await res.json();
+        const idx = allMessages.findIndex(x => x._id === msgId);
+        if (idx !== -1) allMessages[idx] = updated;
+        renderTable();
+        document.getElementById('markReadBtn').textContent = 'Mark as Unread';
+      } catch (err) {
+        console.error(err);
+      }
     }
 
     function closeModal(e) {
@@ -769,29 +715,66 @@
     }
     function closeModalDirect() {
       document.getElementById('modalOverlay').classList.remove('open');
-      currentOrderId = null;
+      currentMsgId = null;
     }
 
-    async function updateOrder() {
-      if (!currentOrderId) return;
-      const isPaid = document.getElementById('mPayStatus').value === 'paid';
-      const isDelivered = document.getElementById('mDelStatus').value === 'delivered';
+    async function toggleRead() {
+      if (!currentMsgId) return;
+      const m = allMessages.find(x => x._id === currentMsgId);
+      const newStatus = !m.isRead;
       try {
-        const res = await fetch(`${API_BASE}/orders/admin/${currentOrderId}`, {
+        const res = await fetch(`${API_BASE}/contact/admin/${currentMsgId}`, {
           method: 'PUT',
           headers: authHeaders(),
-          body: JSON.stringify({ isPaid, isDelivered })
+          body: JSON.stringify({ isRead: newStatus })
         });
         if (!res.ok) throw new Error(await res.text());
         const updated = await res.json();
-        const idx = allOrders.findIndex(o => o._id === currentOrderId);
-        if (idx !== -1) allOrders[idx] = updated;
+        const idx = allMessages.findIndex(x => x._id === currentMsgId);
+        if (idx !== -1) allMessages[idx] = updated;
         renderTable();
         closeModalDirect();
-        showToast('Order updated successfully');
+        showToast(newStatus ? 'Marked as read' : 'Marked as unread');
       } catch (err) {
         console.error(err);
-        showToast('Failed to update order');
+        showToast('Failed to update message');
+      }
+    }
+
+    async function deleteMessage() {
+      if (!currentMsgId) return;
+      if (!confirm('Delete this message permanently?')) return;
+      try {
+        const res = await fetch(`${API_BASE}/contact/admin/${currentMsgId}`, {
+          method: 'DELETE',
+          headers: authHeaders()
+        });
+        if (!res.ok) throw new Error(await res.text());
+        allMessages = allMessages.filter(x => x._id !== currentMsgId);
+        renderTable();
+        closeModalDirect();
+        showToast('Message deleted');
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to delete message');
+      }
+    }
+
+    async function quickDelete(msgId) {
+      if (!confirm('Delete this message permanently?')) return;
+      try {
+        const res = await fetch(`${API_BASE}/contact/admin/${msgId}`, {
+          method: 'DELETE',
+          headers: authHeaders()
+        });
+        if (!res.ok) throw new Error(await res.text());
+        allMessages = allMessages.filter(x => x._id !== msgId);
+        renderTable();
+        document.getElementById('msgCount').textContent = `${allMessages.length} messages total`;
+        showToast('Message deleted');
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to delete message');
       }
     }
 

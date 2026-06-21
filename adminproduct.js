@@ -15,7 +15,6 @@ import {
 const gate = document.getElementById('adminGate');
 const layout = document.getElementById('adminLayout');
 
-// Page detection — same file works on adminproduct.html AND index.html
 const isProductsPage = !!document.getElementById('adminProductsBody');
 const isDashboardPage = !!document.getElementById('statRevenue');
 
@@ -57,9 +56,9 @@ function resolveImg(path) {
   return `${BASE_URL}${path}`;
 }
 
-/* =========================================================
+/* 
    PRODUCTS PAGE (adminproduct.html)
-========================================================= */
+*/
 
 async function loadProducts() {
   tbody.innerHTML = `<tr><td colspan="6" class="admin-table-loading">Loading…</td></tr>`;

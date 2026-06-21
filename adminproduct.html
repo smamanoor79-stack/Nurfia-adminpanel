@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin – Products – Nurfia</title>
   <link rel="stylesheet" href="admin.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;700&family=Instrument+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
 </head>
+
 <body class="admin-body">
 
   <!-- Gate: shown only if user is not admin -->
@@ -26,21 +30,24 @@
     <aside class="admin-sidebar">
       <a href="index.html" class="admin-logo">NURFIA</a>
       <p class="admin-sidebar-label">Admin Panel</p>
-      
+
       <nav class="admin-nav">
-  <a href="index.html" class="admin-nav-item">
-    <i class="fa-solid fa-gauge"></i> Dashboard
-  </a>
-  <a href="adminproduct.html" class="admin-nav-item active">
-    <i class="fa-solid fa-shirt"></i> Products
-  </a>
-  <a href="adminorders.html" class="admin-nav-item">
-    <i class="fa-solid fa-box"></i> Orders
-  </a>
-  <a href="adminusers.html" class="admin-nav-item">
-    <i class="fa-solid fa-users"></i> Users
-  </a>
-</nav>
+        <a href="index.html" class="admin-nav-item">
+          <i class="fa-solid fa-gauge"></i> Dashboard
+        </a>
+        <a href="adminproduct.html" class="admin-nav-item active">
+          <i class="fa-solid fa-shirt"></i> Products
+        </a>
+        <a href="adminorders.html" class="admin-nav-item">
+          <i class="fa-solid fa-box"></i> Orders
+        </a>
+        <a href="adminusers.html" class="admin-nav-item">
+          <i class="fa-solid fa-users"></i> Users
+        </a>
+        <a href="adminmessages.html" class="admin-nav-item">
+          <i class="fa-solid fa-envelope"></i> Messages
+        </a>
+      </nav>
     </aside>
 
     <!-- Main content -->
@@ -68,7 +75,9 @@
             </tr>
           </thead>
           <tbody id="adminProductsBody">
-            <tr><td colspan="6" class="admin-table-loading">Loading…</td></tr>
+            <tr>
+              <td colspan="6" class="admin-table-loading">Loading…</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -171,4 +180,5 @@
 
   <script type="module" src="adminproduct.js"></script>
 </body>
+
 </html>
