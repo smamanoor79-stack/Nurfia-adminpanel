@@ -9,6 +9,7 @@ import {
   adminGetAllOrders,
   adminGetAllUsers,
   uploadImage,
+  BASE_URL,
 } from './api.js';
 
 const gate = document.getElementById('adminGate');
@@ -19,12 +20,12 @@ const isProductsPage = !!document.getElementById('adminProductsBody');
 const isDashboardPage = !!document.getElementById('statRevenue');
 
 let products = [];
-let editingId = null; // null = add mode, otherwise editing this product's _id
+let editingId = null;
 
 const tbody = document.getElementById('adminProductsBody');
 const countLabel = document.getElementById('productCountLabel');
 
-// ===== ADMIN ACCESS CHECK (shared by both pages) =====
+// ===== ADMIN ACCESS CHECK =====
 const user = getUser();
 if (!isLoggedIn() || !user || !user.isAdmin) {
   gate.style.display = 'flex';
@@ -47,6 +48,13 @@ async function init() {
   } else if (isProductsPage) {
     await loadProducts();
   }
+}
+
+// Helper: relative path ko full URL banao
+function resolveImg(path) {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `${BASE_URL}${path}`;
 }
 
 /* =========================================================
@@ -74,12 +82,18 @@ function renderTable() {
 
   tbody.innerHTML = products.map(p => {
     const inStock = p.stock > 0 && p.availability !== false;
-    const displayPrice = p.salePrice ? `<span style="text-decoration:line-through;color:#bbb;margin-right:6px;">$${p.price.toFixed(2)}</span>$${p.salePrice.toFixed(2)}` : `$${p.price.toFixed(2)}`;
+    const displayPrice = p.salePrice
+      ? `<span style="text-decoration:line-through;color:#bbb;margin-right:6px;">$${p.price.toFixed(2)}</span>$${p.salePrice.toFixed(2)}`
+      : `$${p.price.toFixed(2)}`;
+    const imgSrc = resolveImg(p.image);
     return `
       <tr>
         <td>
           <div class="admin-product-cell">
-            <img src="${p.image || ''}" alt="${escapeHtml(p.name)}" onerror="this.style.visibility='hidden'" />
+            ${imgSrc && imgSrc.endsWith('.mp4')
+        ? `<video src="${imgSrc}" muted style="width:40px;height:48px;object-fit:cover;border-radius:4px;"></video>`
+        : `<img src="${imgSrc}" alt="${escapeHtml(p.name)}" onerror="this.style.visibility='hidden'" />`
+      }
             <span class="admin-product-name">${escapeHtml(p.name)}</span>
           </div>
         </td>
@@ -222,7 +236,7 @@ document.getElementById('productModalSave')?.addEventListener('click', async () 
   }
 });
 
-// ===== IMAGE UPLOAD (Cloudinary) =====
+// ===== IMAGE UPLOAD =====
 document.getElementById('pf-imageFile')?.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -273,7 +287,7 @@ document.getElementById('deleteModalConfirm')?.addEventListener('click', async (
   }
 });
 
-// Dasboard Page
+// ===== DASHBOARD =====
 
 function initDashboardGreeting() {
   const hr = new Date().getHours();
@@ -335,8 +349,8 @@ function renderRecentOrders(orders) {
     const badge = o.isDelivered
       ? `<span class="badge badge-delivered">Delivered</span>`
       : o.isPaid
-      ? `<span class="badge badge-paid">Paid</span>`
-      : `<span class="badge badge-pending">Pending</span>`;
+        ? `<span class="badge badge-paid">Paid</span>`
+        : `<span class="badge badge-pending">Pending</span>`;
     return `
       <tr>
         <td class="order-id-sm">#${o._id.slice(-7).toUpperCase()}</td>
@@ -349,19 +363,24 @@ function renderRecentOrders(orders) {
 
 function renderLowStock(dashProducts) {
   const el = document.getElementById('lowStockList');
-  const lowList = [...dashProducts].filter(p => (p.stock ?? 0) <= 10).sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0)).slice(0, 5);
+  const lowList = [...dashProducts]
+    .filter(p => (p.stock ?? 0) <= 10)
+    .sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0))
+    .slice(0, 5);
 
   if (lowList.length === 0) {
     el.innerHTML = `<div class="empty-sm">All products are well stocked.</div>`;
     return;
   }
 
+  const FALLBACK_IMG = "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='38' height='44' viewBox='0 0 38 44'%3E%3Crect width='38' height='44' fill='%23eeeeee'/%3E%3Ctext x='19' y='25' font-size='10' text-anchor='middle' fill='%23999999'%3EN%2FA%3C%2Ftext%3E%3C%2Fsvg%3E";
+
   el.innerHTML = lowList.map(p => {
     const isLow = (p.stock ?? 0) <= 5;
-    const FALLBACK_IMG = "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='38' height='44' viewBox='0 0 38 44'%3E%3Crect width='38' height='44' fill='%23eeeeee'/%3E%3Ctext x='19' y='25' font-size='10' text-anchor='middle' fill='%23999999'%3EN%2FA%3C%2Ftext%3E%3C%2Fsvg%3E";
+    const imgSrc = resolveImg(p.image) || FALLBACK_IMG;
     const imgTag = p.image && p.image.endsWith('.mp4')
-      ? `<video class="stock-img" src="${p.image}" muted></video>`
-      : `<img class="stock-img" src="${p.image || FALLBACK_IMG}" alt="${escapeHtml(p.name)}"
+      ? `<video class="stock-img" src="${imgSrc}" muted></video>`
+      : `<img class="stock-img" src="${imgSrc}" alt="${escapeHtml(p.name)}"
            onerror="this.onerror=null;this.src='${FALLBACK_IMG}'" />`;
     return `
       <div class="stock-item">

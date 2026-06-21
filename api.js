@@ -1,5 +1,13 @@
-// api.js
-export const BASE_URL = 'https://nurfiabackend-t5gdfm2v.b4a.run/';
+const isProd = window.location.hostname !== 'localhost';
+export const BASE_URL = isProd
+  ? 'https://YOUR-RENDER-URL.onrender.com'  // Render deploy hone ke baad yahan actual URL dalna
+  : 'http://localhost:5000';
+
+export function getImageUrl(imagePath) {
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http')) return imagePath;
+  return `${BASE_URL}${imagePath}`;
+}
 
 // Token helpers
 export function getToken() {
@@ -135,7 +143,8 @@ export async function getMyOrders() {
 export async function getOrderById(id) {
   return await apiFetch(`/api/orders/${id}`);
 }
-// ---- ADMIN PRODUCT APIs  ----
+
+// ---- ADMIN PRODUCT APIs ----
 export async function createProduct(productData) {
   return await apiFetch('/api/products', {
     method: 'POST',
@@ -153,7 +162,8 @@ export async function updateProduct(id, productData) {
 export async function deleteProduct(id) {
   return await apiFetch(`/api/products/${id}`, { method: 'DELETE' });
 }
-// Admin APIs — 
+
+// ---- ADMIN APIs ----
 export async function adminGetAllOrders() {
   return await apiFetch('/api/orders/admin/all');
 }
@@ -162,19 +172,18 @@ export async function adminGetAllUsers() {
   return await apiFetch('/api/users/admin/all');
 }
 
-export async function uploadImage(file) {
-  const formData = new FormData();
-  formData.append('image', file);
-
+// ---- IMAGE UPLOAD ----
+export async function uploadImage(formData) {
+  const token = getToken();
   const res = await fetch(`${BASE_URL}/api/upload`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${getToken()}`,
+      Authorization: `Bearer ${token}`
+      // Content-Type mat dalna — browser khud set karta hai
     },
-    body: formData,
+    body: formData
   });
-
-  if (!res.ok) throw new Error('Image upload failed');
   const data = await res.json();
-  return data.url;
+  if (!res.ok) throw new Error(data.message || 'Image upload failed');
+  return data;
 }
