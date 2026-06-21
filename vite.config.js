@@ -10,6 +10,7 @@ export default defineConfig({
         adminorders: resolve(__dirname, 'adminorders.html'),
         adminusers: resolve(__dirname, 'adminusers.html'),
         adminlogin: resolve(__dirname, 'adminlogin.html'),
+        adminmessages: resolve(__dirname, 'adminmessages.html'),
       },
     },
   },
