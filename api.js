@@ -87,7 +87,13 @@ export async function getUserProfile() {
 
 // ---- PRODUCTS APIs ----
 export async function getAllProducts() {
-  return await apiFetch('/api/products');
+  try {
+    return await apiFetch('/api/products');
+  } catch (err) {
+    console.warn('Backend unreachable, showing local fallback products:', err.message);
+    const res = await fetch('/products.json');
+    return await res.json();
+  }
 }
 
 export async function getSingleProduct(id) {
